@@ -1,10 +1,27 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.routes.issues import router as issues_router
+from app.middleware.timing import timing_middleware
 
-app = FastAPI()
-app.include_router(issues_router)
 
-@app.get("/health")
+app = FastAPI(
+    title="Issue Tracker API",
+    version="0.1.0",
+    description="A simple production style API built with FastAPI.",
+)
+
+
+app.middleware("http")(timing_middleware)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.get("/api/v1/health")
 def health_check():
     return {"status": "Ok"}
 
+app.include_router(issues_router)
